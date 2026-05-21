@@ -267,7 +267,7 @@ Rules:
 - Share information gradually based on the quality of the user's questions.
 - If the user asks unrelated questions, politely redirect the conversation back to delivery operations.
 - Keep answers realistic, concise, and professional."""
-                    model = genai.GenerativeModel("gemini-pro")
+                    model = genai.GenerativeModel("gemini-1.5-flash")
                     chat_history_str = "\n".join([f"{m['role']}: {m['content']}" for m in st.session_state.chat_sarah])
                     response = model.generate_content(f"{sarah_prompt}\n\nConversation History:\n{chat_history_str}")
                     st.session_state.chat_sarah.append({"role": "assistant", "content": response.text})
@@ -315,7 +315,7 @@ Rules:
 - Share information gradually based on the quality of the user's questions.
 - If the user asks unrelated questions, politely redirect the conversation back to customer complaints and delivery delay issues.
 - Keep answers realistic, concise, and professional."""
-                    model = genai.GenerativeModel("gemini-pro")
+                    model = genai.GenerativeModel("gemini-1.5-flash")
                     chat_history_str = "\n".join([f"{m['role']}: {m['content']}" for m in st.session_state.chat_omar])
                     response = model.generate_content(f"{omar_prompt}\n\nConversation History:\n{chat_history_str}")
                     st.session_state.chat_omar.append({"role": "assistant", "content": response.text})
@@ -364,7 +364,7 @@ Rules:
 - Share information gradually based on the quality of the user's questions.
 - If the user asks unrelated questions, politely redirect the conversation back to delivery work and route issues.
 - Keep answers realistic and concise."""
-                    model = genai.GenerativeModel("gemini-pro")
+                    model = genai.GenerativeModel("gemini-1.5-flash")
                     chat_history_str = "\n".join([f"{m['role']}: {m['content']}" for m in st.session_state.chat_faisal])
                     response = model.generate_content(f"{faisal_prompt}\n\nConversation History:\n{chat_history_str}")
                     st.session_state.chat_faisal.append({"role": "assistant", "content": response.text})
@@ -413,7 +413,7 @@ Rules:
 - Share information gradually based on the quality of the user's questions.
 - If the user asks unrelated questions, politely redirect the conversation back to the business impact of delivery delays.
 - Avoid operational details unless the user asks at a high level."""
-                    model = genai.GenerativeModel("gemini-pro")
+                    model = genai.GenerativeModel("gemini-1.5-flash")
                     chat_history_str = "\n".join([f"{m['role']}: {m['content']}" for m in st.session_state.chat_naser])
                     response = model.generate_content(f"{naser_prompt}\n\nConversation History:\n{chat_history_str}")
                     st.session_state.chat_naser.append({"role": "assistant", "content": response.text})
@@ -461,7 +461,7 @@ Rules:
 - Share information gradually based on the quality of the user's questions.
 - If the user asks unrelated questions, politely redirect the conversation back to your delivery experience.
 - Keep answers realistic and concise."""
-                    model = genai.GenerativeModel("gemini-pro")
+                    model = genai.GenerativeModel("gemini-1.5-flash")
                     chat_history_str = "\n".join([f"{m['role']}: {m['content']}" for m in st.session_state.chat_reem])
                     response = model.generate_content(f"{reem_prompt}\n\nConversation History:\n{chat_history_str}")
                     st.session_state.chat_reem.append({"role": "assistant", "content": response.text})
@@ -606,7 +606,7 @@ elif st.session_state.step == 13:
                 - Requirements: Business: {st.session_state.business_reqs} | Functional: {st.session_state.functional_reqs}
                 - Acceptance Criteria: {st.session_state.acceptance_criteria}
                 """
-                model = genai.GenerativeModel("gemini-pro")
+                model = genai.GenerativeModel("gemini-1.5-flash")
                 response = model.generate_content(eval_prompt)
                 st.session_state.final_coaching_report = response.text
             except Exception as e:
