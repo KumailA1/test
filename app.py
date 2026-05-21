@@ -450,7 +450,7 @@ elif st.session_state.step == 12:
         if st.button("Complete Simulation"): go_to(13)
 
 # -------------------------------------------------------------
-# PAGE 13: EVALUATION & ANALYSIS REPORT (التحديث الجديد هنا)
+# PAGE 13: EVALUATION & ANALYSIS REPORT (English Coach Update)
 # -------------------------------------------------------------
 elif st.session_state.step == 13:
     st.title("🔍 Expert BRD Review & Coaching Feedback")
@@ -459,17 +459,17 @@ elif st.session_state.step == 13:
     if "final_coaching_report" not in st.session_state:
         with st.spinner("Analyzing your full input section by section..."):
             try:
-                # البرومبت الجديد المخصص لتقييم ذكي، تفاعلي، ومحفز بالعربية
+                # Prompt shifted completely to English evaluation and instructions
                 eval_prompt = f"""
-                You are a supportive, wise, and highly experienced Senior Business Analyst and Instructor.
-                Your job is to read the user's answers and evaluate their quality based on the Veltra Logistics case study.
+                You are a supportive, wise, and highly experienced Senior Business Analyst and Peer Coach.
+                Your job is to read the user's workspace responses and evaluate their quality based on the Veltra Logistics case study.
                 
                 CRITICAL PERSONA RULES:
-                - Tone must be extremely encouraging, polite, friendly, and professional (like a peer coach).
-                - Speak in Arabic.
-                - Never judge or hurt the user. Appreciate their effort first.
-                - ABSOLUTELY DO NOT write a complete final solution for them. Only give suggestions on how THEY can improve it.
-                - Structure your response using markdown sections.
+                - Tone must be extremely encouraging, polite, friendly, and professional.
+                - MUST RESPOND ENTIRELY IN ENGLISH.
+                - Never judge, criticize harshly, or discourage the user. Always praise their efforts and logical thinking first.
+                - ABSOLUTELY DO NOT write the complete final solution text for them. Instead, guide them on how to improve it on their own.
+                - Structure your response beautifully using markdown sections.
                 
                 Review each section below that the user filled out:
                 1. Problem Statement: "{st.session_state.problem_statement}"
@@ -480,10 +480,10 @@ elif st.session_state.step == 13:
                 6. Acceptance Criteria: "{st.session_state.acceptance_criteria}"
                 
                 For each section, provide:
-                - نقاط القوة (Strengths): Mention what they did well (even if it's brief, praise their logic or specific keywords used).
-                - فرص التحسين والتطوير (Suggestions): Give actionable advice. For example: if they didn't include numbers, advise them to make it SMART; if they mixed functional with business requirements, guide them on how to separate them.
+                - 👍 Strengths: Mention what they did well (appreciate their choice of keywords, identification of pain points, or structure).
+                - 🚀 Suggestions for Improvement: Give actionable advice. For example: if they forgot metrics, advise them to make it SMART; if they mixed up functional with business goals, explain how to clearly isolate them.
                 
-                End the response with an inspiring encouraging note about their potential as a future Business Analyst!
+                End the entire report with an inspiring, motivational note cheering them on in their journey to becoming an outstanding Business Analyst!
                 """
                 model = genai.GenerativeModel("gemini-2.5-flash")
                 response = model.generate_content(eval_prompt)
