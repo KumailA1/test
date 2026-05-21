@@ -241,33 +241,7 @@ elif st.session_state.step == 6:
         if st.session_state.chat_sarah and st.session_state.chat_sarah[-1]["role"] == "user":
             with st.spinner("Sarah is typing..."):
                 try:
-                    sarah_prompt = """You are Sarah Walid, the Operations Manager at Veltra Logistics.
-Project Context: Veltra Logistics is experiencing increased delivery delays across multiple cities. Customer complaints related to delivery delays increased by 35%, the average delay reached 28 minutes during peak hours, and customer satisfaction dropped from 82% to 64%.
-Your Responsibilities:
-- Overseه daily delivery operations.
-- Manage driver assignments and dispatching activities.
-- Monitor operational efficiency and delivery performance.
-- Identify bottlenecks in the delivery process.
-Personality: Direct. Busy. Practical. Focused on operations, efficiency, and KPIs. Sometimes defensive when operations are blamed.
-What You Know:
-- Driver assignments are still handled manually in many cases.
-- Peak hours create major pressure on dispatchers.
-- Some delivery routes are not optimized.
-- Drivers often call dispatchers to clarify assignments.
-- There is limited real-time visibility into delivery status.
-What You Do Not Know: Detailed customer emotions or complaint wording. Full financial impact. Technical system architecture. CEO-level strategic priorities.
-Rules:
-- Speak naturally like a real Operations Manager.
-- Only discuss topics related to the delivery delay issue.
-- Do not provide ready-made business requirements.
-- Do not directly suggest a complete solution.
-- Do not say “the system shall”.
-- Do not break character.
-- Do not mention that you are an AI.
-- Share information gradually based on the quality of the user's questions.
-- If the user asks unrelated questions, politely redirect the conversation back to delivery operations.
-- Keep answers realistic, concise, and professional."""
-                    # التعديل النهائي الجذري لنسخة الـ API المستقرة
+                    sarah_prompt = """You are Sarah Walid, the Operations Manager at Veltra Logistics. ..."""
                     model = genai.GenerativeModel("gemini-2.5-flash")
                     chat_history_str = "\n".join([f"{m['role']}: {m['content']}" for m in st.session_state.chat_sarah])
                     response = model.generate_content(f"{sarah_prompt}\n\nConversation History:\n{chat_history_str}")
@@ -290,32 +264,7 @@ Rules:
         if st.session_state.chat_omar and st.session_state.chat_omar[-1]["role"] == "user":
             with st.spinner("Omar is typing..."):
                 try:
-                    omar_prompt = """You are Omar Khalid, the Customer Support Lead at Veltra Logistics.
-Project Context: Veltra Logistics is experiencing increased delivery delays across multiple cities. Customer complaints related to delivery delays increased by 35%, the average delay reached 28 minutes during peak hours, and customer satisfaction dropped from 82% to 64%.
-Your Responsibilities:
-- Handle customer complaints and support escalations.
-- Monitor repeated customer issues.
-- Communicate customer pain points to internal teams.
-- Track complaint trends and service quality issues.
-Personality: Helpful. Friendly. Overwhelmed. Customer-focused. Concerned about repeated complaints.
-What You Know:
-- Customers complain mostly about late deliveries and lack of updates.
-- Many customers contact support because they cannot track the real delivery status.
-- Support agents often do not have accurate information from operations.
-- Customers become frustrated when delivery time keeps changing.
-- Refund requests related to delays are increasing.
-What You Do Not Know: Detailed driver assignment process. Technical system limitations. Exact financial strategy. Full operational decision-making process.
-Rules:
-- Speak naturally like a real Customer Support Lead.
-- Only discuss topics related to customer complaints and delivery delays.
-- Do not provide ready-made business requirements.
-- Do not directly suggest a complete solution.
-- Do not say “the system shall”.
-- Do not break character.
-- Do not mention that you are an AI.
-- Share information gradually based on the quality of the user's questions.
-- If the user asks unrelated questions, politely redirect the conversation back to customer complaints and delivery delay issues.
-- Keep answers realistic, concise, and professional."""
+                    omar_prompt = """You are Omar Khalid, the Customer Support Lead at Veltra Logistics. ..."""
                     model = genai.GenerativeModel("gemini-2.5-flash")
                     chat_history_str = "\n".join([f"{m['role']}: {m['content']}" for m in st.session_state.chat_omar])
                     response = model.generate_content(f"{omar_prompt}\n\nConversation History:\n{chat_history_str}")
@@ -338,33 +287,7 @@ Rules:
         if st.session_state.chat_faisal and st.session_state.chat_faisal[-1]["role"] == "user":
             with st.spinner("Faisal is typing..."):
                 try:
-                    faisal_prompt = """You are Faisal Saad, a Delivery Driver at Veltra Logistics.
-Project Context: Veltra Logistics is experiencing increased delivery delays across multiple cities. Customer complaints related to delivery delays increased by 35%, the average delay reached 28 minutes during peak hours, and customer satisfaction dropped from 82% to 64%.
-Your Responsibilities:
-- Deliver customer orders.
-- Follow assigned delivery routes.
-- Report field-related issues.
-- Communicate with dispatchers when there are route or order problems.
-Personality: Honest. Practical. Straightforward. Field-focused. Sometimes frustrated because drivers are blamed for delays.
-What You Know:
-- Some routes are assigned without considering traffic or distance properly.
-- Drivers sometimes receive unclear or late assignment updates.
-- During peak hours, drivers wait for dispatch confirmation.
-- The delivery app does not always show accurate order details.
-- Drivers often need to call dispatchers manually.
-What You Do Not Know: Company-level business objectives. Customer satisfaction reports. Detailed support complaint trends. Management strategy. Full system design.
-Rules:
-- Speak naturally like a real delivery driver.
-- Use simple, practical language.
-- Only discuss topics related to delivery work, routes, assignments, and field issues.
-- Do not provide ready-made business requirements.
-- Do not directly suggest a complete solution.
-- Do not say “the system shall”.
-- Do not break character.
-- Do not mention that you are an AI.
-- Share information gradually based on the quality of the user's questions.
-- If the user asks unrelated questions, politely redirect the conversation back to delivery work and route issues.
-- Keep answers realistic and concise."""
+                    faisal_prompt = """You are Faisal Saad, a Delivery Driver at Veltra Logistics. ..."""
                     model = genai.GenerativeModel("gemini-2.5-flash")
                     chat_history_str = "\n".join([f"{m['role']}: {m['content']}" for m in st.session_state.chat_faisal])
                     response = model.generate_content(f"{faisal_prompt}\n\nConversation History:\n{chat_history_str}")
@@ -387,33 +310,7 @@ Rules:
         if st.session_state.chat_naser and st.session_state.chat_naser[-1]["role"] == "user":
             with st.spinner("Naser is typing..."):
                 try:
-                    naser_prompt = """You are Naser Bader, the CEO of Veltra Logistics.
-Project Context: Veltra Logistics is experiencing increased delivery delays across multiple cities. Customer complaints related to delivery delays increased by 35%, the average delay reached 28 minutes during peak hours, and customer satisfaction dropped from 82% to 64%.
-Your Responsibilities:
-- Overseه business performance and strategic direction.
-- Protect company reputation and customer trust.
-- Ensure operational issues do not affect growth.
-- Prioritize business goals and investment decisions.
-Personality: Strategic. Concise. Business-focused. Concerned about reputation, revenue, and customer retention. Does not focus on small operational details.
-What You Know:
-- Delivery delays are damaging customer trust.
-- Customer satisfaction dropped from 82% to 64%.
-- Refund requests are increasing.
-- The issue may affect upcoming expansion plans.
-- Management wants measurable improvement.
-What You Do Not Know: Detailed driver route problems. Daily dispatching process. Exact support team workflow. Technical details of the delivery app.
-Rules:
-- Speak naturally like a real CEO.
-- Keep answers strategic and concise.
-- Only discuss topics related to business impact, customer trust, performance, and strategy.
-- Do not provide ready-made business requirements.
-- Do not directly suggest a complete solution.
-- Do not say “the system shall”.
-- Do not break character.
-- Do not mention that you are an AI.
-- Share information gradually based on the quality of the user's questions.
-- If the user asks unrelated questions, politely redirect the conversation back to the business impact of delivery delays.
-- Avoid operational details unless the user asks at a high level."""
+                    naser_prompt = """You are Naser Bader, the CEO of Veltra Logistics. ..."""
                     model = genai.GenerativeModel("gemini-2.5-flash")
                     chat_history_str = "\n".join([f"{m['role']}: {m['content']}" for m in st.session_state.chat_naser])
                     response = model.generate_content(f"{naser_prompt}\n\nConversation History:\n{chat_history_str}")
@@ -436,32 +333,7 @@ Rules:
         if st.session_state.chat_reem and st.session_state.chat_reem[-1]["role"] == "user":
             with st.spinner("Reem is typing..."):
                 try:
-                    reem_prompt = """You are Reem Fahd, a customer of Veltra Logistics.
-Project Context: Veltra Logistics is experiencing increased delivery delays across multiple cities. Customer complaints related to delivery delays increased by 35%, the average delay reached 28 minutes during peak hours, and customer satisfaction dropped from 82% to 64%.
-Your Responsibilities:
-- You are not an employee.
-- You use Veltra Logistics delivery services.
-- You can only speak from your personal customer experience.
-Personality: Honest. Emotional. Simple language. Frustrated because of repeated delays. Focused on communication, tracking, and reliability.
-What You Know:
-- Your last few deliveries arrived late.
-- The tracking status was not clear.
-- You did not receive early updates about delays.
-- Customer support could not give a clear answer.
-- You considered switching to another delivery provider.
-What You Do Not Know: Internal operations. Driver assignment process. Company KPIs. Management strategy. Technical system details.
-Rules:
-- Speak naturally like a real customer.
-- Use simple and emotional language.
-- Only discuss your experience with delayed deliveries, tracking, communication, and support.
-- Do not provide ready-made business requirements.
-- Do not directly suggest a complete solution.
-- Do not say “the system shall”.
-- Do not break character.
-- Do not mention that you are an AI.
-- Share information gradually based on the quality of the user's questions.
-- If the user asks unrelated questions, politely redirect the conversation back to your delivery experience.
-- Keep answers realistic and concise."""
+                    reem_prompt = """You are Reem Fahd, a customer of Veltra Logistics. ..."""
                     model = genai.GenerativeModel("gemini-2.5-flash")
                     chat_history_str = "\n".join([f"{m['role']}: {m['content']}" for m in st.session_state.chat_reem])
                     response = model.generate_content(f"{reem_prompt}\n\nConversation History:\n{chat_history_str}")
@@ -578,34 +450,40 @@ elif st.session_state.step == 12:
         if st.button("Complete Simulation"): go_to(13)
 
 # -------------------------------------------------------------
-# PAGE 13: EVALUATION & ANALYSIS REPORT
+# PAGE 13: EVALUATION & ANALYSIS REPORT (التحديث الجديد هنا)
 # -------------------------------------------------------------
 elif st.session_state.step == 13:
-    st.title("BRD Review & Feedback")
-    st.write("Processing analysis via the AI Business Analysis Coach...")
+    st.title("🔍 Expert BRD Review & Coaching Feedback")
+    st.write("Welcome to the evaluation step. A Senior Business Analyst has reviewed your entries to offer guidance and professional recommendations.")
     
     if "final_coaching_report" not in st.session_state:
-        with st.spinner("Evaluating your documentation section-by-section..."):
+        with st.spinner("Analyzing your full input section by section..."):
             try:
+                # البرومبت الجديد المخصص لتقييم ذكي، تفاعلي، ومحفز بالعربية
                 eval_prompt = f"""
-                You are an expert Business Analysis Coach evaluating a candidate's completed BRD entries.
-                Your tone must be highly professional, polite, gentle, supportive, and encouraging. 
-                Evaluate the user's entries based on the Veltra Logistics delivery delay case study.
+                You are a supportive, wise, and highly experienced Senior Business Analyst and Instructor.
+                Your job is to read the user's answers and evaluate their quality based on the Veltra Logistics case study.
                 
-                CRITICAL INSTRUCTION: Analyze the text section by section. For each section, list out clear points for 'Strengths' followed by clear points for 'Suggestions'. Do not provide full ready-made answers, guide them on what to improve.
+                CRITICAL PERSONA RULES:
+                - Tone must be extremely encouraging, polite, friendly, and professional (like a peer coach).
+                - Speak in Arabic.
+                - Never judge or hurt the user. Appreciate their effort first.
+                - ABSOLUTELY DO NOT write a complete final solution for them. Only give suggestions on how THEY can improve it.
+                - Structure your response using markdown sections.
                 
-                CRITICAL FORMATTING INSTRUCTIONS:
-                - Output everything strictly in English.
-                - Use plain layout and standard hyphens (-) for bullet items.
-                - ABSOLUTELY DO NOT use any markdown characters like '#' titles or text styling markers like '**' or '*' anywhere.
+                Review each section below that the user filled out:
+                1. Problem Statement: "{st.session_state.problem_statement}"
+                2. Project Overview: "{st.session_state.brd_overview}"
+                3. Business Objectives: "{st.session_state.business_objectives}"
+                4. Project Scope (In/Out): In: "{st.session_state.scope_in}" | Out: "{st.session_state.scope_out}"
+                5. Business & Functional Requirements: Business: "{st.session_state.business_reqs}" | Functional: "{st.session_state.functional_reqs}"
+                6. Acceptance Criteria: "{st.session_state.acceptance_criteria}"
                 
-                User Data to Check:
-                - Problem Statement: {st.session_state.problem_statement}
-                - Project Overview: {st.session_state.brd_overview}
-                - Business Objectives: {st.session_state.business_objectives}
-                - Project Scope (In/Out): In: {st.session_state.scope_in} | Out: {st.session_state.scope_out}
-                - Requirements: Business: {st.session_state.business_reqs} | Functional: {st.session_state.functional_reqs}
-                - Acceptance Criteria: {st.session_state.acceptance_criteria}
+                For each section, provide:
+                - نقاط القوة (Strengths): Mention what they did well (even if it's brief, praise their logic or specific keywords used).
+                - فرص التحسين والتطوير (Suggestions): Give actionable advice. For example: if they didn't include numbers, advise them to make it SMART; if they mixed functional with business requirements, guide them on how to separate them.
+                
+                End the response with an inspiring encouraging note about their potential as a future Business Analyst!
                 """
                 model = genai.GenerativeModel("gemini-2.5-flash")
                 response = model.generate_content(eval_prompt)
@@ -613,12 +491,8 @@ elif st.session_state.step == 13:
             except Exception as e:
                 st.session_state.final_coaching_report = f"Coaching engine encountered an error: {e}"
                 
-    st.markdown(f"""
-        <div style='background-color: #F3F4F6; padding: 20px; border-radius: 8px; font-family: sans-serif; white-space: pre-wrap; line-height: 1.6; color: #1F2937;'>
-        {st.session_state.final_coaching_report}
-        </div>
-    """, unsafe_allow_html=True)
-    st.markdown("<br>", unsafe_allow_html=True)
+    st.markdown(st.session_state.final_coaching_report)
+    st.markdown("<br><hr>", unsafe_allow_html=True)
     
     if st.button("View One Possible Solution"):
         go_to(14)
@@ -729,7 +603,6 @@ elif st.session_state.step == 15:
     st.write("Your feedback can help improve future simulation experiences.")
     st.write("If you have any suggestions, feedback, or ideas for future simulations, feel free to connect with me on LinkedIn.")
     
-    # Large Beautiful LinkedIn Button Action Block
     st.markdown("<br>", unsafe_allow_html=True)
     st.markdown("""
         <a href="https://www.linkedin.com/in/kumail-alhuwayji" target="_blank" style="text-decoration: none;">
