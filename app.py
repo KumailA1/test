@@ -572,7 +572,7 @@ elif st.session_state.step == 12:
     
     col1, col2 = st.columns([1, 5])
     with col1:
-        if m = st.button("Back"): go_to(11)
+        if st.button("Back"): go_to(11)
     with col2:
         if st.button("Complete Simulation"): go_to(13)
 
