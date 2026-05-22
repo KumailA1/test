@@ -1,315 +1,156 @@
 import streamlit as st
-import google.generativeai as genai
+from google import genai
 
-# ==========================================
-# 1. Page Configuration & Global Layout Rules
-# ==========================================
-st.set_page_config(page_title="BRD Simulation", page_icon="💼", layout="wide")
+# =========================================================
+# BRD Simulation MVP
+# Tech: Streamlit + Gemini API
+# Secret required in Streamlit Secrets:
+# GEMINI_API_KEY = "your_api_key_here"
+# =========================================================
 
-def load_premium_ui_theme():
-    st.markdown("""
-        <style>
-        /* Modern high-tech dark background */
-        .stApp {
-            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
-            color: #f8fafc;
-        }
-        
-        /* Persistent Header Style */
-        .global-header {
-            font-size: 1.1rem;
-            font-weight: 700;
-            color: #6366f1;
-            padding-bottom: 10px;
-            border-bottom: 1px solid rgba(99, 102, 241, 0.2);
-            margin-bottom: 25px;
-        }
-        
-        /* Unified Typographic Structure */
-        h1, h2, h3 {
-            color: #6366f1 !important;
-            font-family: 'Segoe UI', system-ui, sans-serif;
-            font-weight: 700;
-        }
-        
-        /* Unified Button Architecture */
-        .stButton>button {
-            background: linear-gradient(90deg, #4f46e5 0%, #06b6d4 100%) !important;
-            color: white !important;
-            border-radius: 10px !important;
-            border: none !important;
-            padding: 10px 22px !important;
-            font-weight: bold !important;
-            transition: all 0.25s ease-in-out !important;
-            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
-            width: 100%;
-        }
-        
-        .stButton>button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 18px rgba(6, 182, 212, 0.5);
-        }
-        
-        /* Form, text fields, and textarea inputs styling */
-        .stTextInput>div>div>input, .stTextArea>div>div>textarea {
-            background-color: #1e293b !important;
-            color: white !important;
-            border-radius: 10px !important;
-            border: 1px solid #334155 !important;
-        }
-        
-        /* Info alert cards box formatting */
-        .stAlert {
-            background-color: #1e293b !important;
-            border-left: 5px solid #06b6d4 !important;
-            border-radius: 12px !important;
-            color: #e2e8f0 !important;
-        }
-        
-        /* Dynamic Sticky Footer */
-        .global-footer {
-            margin-top: 50px;
-            padding-top: 15px;
-            border-top: 1px solid rgba(51, 65, 85, 0.5);
-            text-align: center;
-            font-size: 0.9rem;
-            color: #94a3b8;
-        }
-        .global-footer a {
-            color: #06b6d4 !important;
-            text-decoration: none;
-            font-weight: bold;
-        }
-        .global-footer a:hover {
-            text-decoration: underline;
-        }
-        </style>
-    """, unsafe_allow_html=True)
+APP_TITLE = "BRD Simulation"
+AUTHOR_NAME = "Ali Alali"
+LINKEDIN_URL = "https://www.linkedin.com/"
+MODEL_NAME = "gemini-2.5-flash"
 
-load_premium_ui_theme()
+# -----------------------------
+# Page Config
+# -----------------------------
+st.set_page_config(
+    page_title=APP_TITLE,
+    page_icon="📄",
+    layout="wide",
+)
 
-# Display Persistent Top-Left Label on All Screens
-st.markdown('<div class="global-header">💼 BRD Simulation</div>', unsafe_allow_html=True)
+# -----------------------------
+# Basic Styling
+# -----------------------------
+st.markdown(
+    """
+    <style>
+    .main { background-color: #ffffff; }
+    .block-container { padding-top: 2rem; padding-bottom: 2rem; max-width: 1100px; }
+    .top-title { font-size: 22px; font-weight: 700; color: #1f2937; }
+    .footer { position: fixed; bottom: 10px; left: 0; right: 0; text-align: center; color: #6b7280; font-size: 13px; }
+    .footer a { color: #2563eb; text-decoration: none; }
+    .card { border: 1px solid #e5e7eb; border-radius: 16px; padding: 18px; margin-bottom: 14px; background: #ffffff; box-shadow: 0 2px 8px rgba(0,0,0,0.03); }
+    .muted { color: #6b7280; }
+    .small { font-size: 14px; }
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
 
-# ==========================================
-# 2. Custom UI Component Builders
-# ==========================================
+# -----------------------------
+# Header / Footer
+# -----------------------------
+def render_header():
+    st.markdown(f'<div class="top-title">{APP_TITLE}</div>', unsafe_allow_html=True)
+    st.divider()
 
-# Interactive Stakeholder Card Component
-def display_stakeholder_card(name, role, description, avatar_seed):
-    avatar_url = f"https://api.dicebear.com/7.x/avataaars/svg?seed={avatar_seed}"
-    st.markdown(f"""
-        <div style="
-            background: rgba(30, 41, 59, 0.7);
-            border-radius: 14px;
-            padding: 18px;
-            border: 1px solid rgba(99, 102, 241, 0.15);
-            backdrop-filter: blur(8px);
-            display: flex;
-            align-items: center;
-            margin-bottom: 15px;
-        ">
-            <img src="{avatar_url}" style="width: 65px; height: 65px; border-radius: 50%; margin-right: 18px; border: 2px solid #06b6d4; background-color: #0f172a;">
-            <div>
-                <h4 style="margin: 0; color: #fff; font-family: 'Segoe UI'; font-size: 1.1rem;">{name}</h4>
-                <p style="margin: 2px 0 6px 0; color: #06b6d4; font-size: 0.85rem; font-weight: 600;">{role}</p>
-                <p style="margin: 0; color: #94a3b8; font-size: 0.85rem; line-height: 1.4;">{description}</p>
-            </div>
-        </div>
-    """, unsafe_allow_html=True)
 
-# Premium Instant Messenger Chat Bubble Component
-def display_chat_bubble(text, is_user=False):
-    align = "flex-end" if is_user else "flex-start"
-    bg_color = "#4f46e5" if is_user else "#1e293b"
-    border_radius = "14px 14px 0px 14px" if is_user else "14px 14px 14px 0px"
-    
-    st.markdown(f"""
-        <div style="display: flex; justify-content: {align}; margin-bottom: 12px;">
-            <div style="
-                background-color: {bg_color};
-                color: #ffffff;
-                padding: 12px 16px;
-                border-radius: {border_radius};
-                max-width: 75%;
-                box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-                font-family: 'Segoe UI', system-ui, sans-serif;
-                font-size: 0.95rem;
-                line-height: 1.4;
-            ">
-                {text}
-            </div>
-        </div>
-    """, unsafe_allow_html=True)
+def render_footer():
+    st.markdown(
+        f'<div class="footer">Created by <a href="{LINKEDIN_URL}" target="_blank">{AUTHOR_NAME}</a></div>',
+        unsafe_allow_html=True,
+    )
 
-# ==========================================
-# 3. Core State Infrastructure & API Init
-# ==========================================
-if "page" not in st.session_state:
-    st.session_state.page = 1
-if "user_name" not in st.session_state:
-    st.session_state.user_name = "Analyst"
-if "problem_statement" not in st.session_state:
-    st.session_state.problem_statement = ""
-if "brd_overview" not in st.session_state:
-    st.session_state.brd_overview = ""
-if "brd_objectives" not in st.session_state:
-    st.session_state.brd_objectives = ""
-if "brd_in_scope" not in st.session_state:
-    st.session_state.brd_in_scope = ""
-if "brd_out_scope" not in st.session_state:
-    st.session_state.brd_out_scope = ""
-if "brd_biz_reqs" not in st.session_state:
-    st.session_state.brd_biz_reqs = ""
-if "brd_func_reqs" not in st.session_state:
-    st.session_state.brd_func_reqs = ""
-if "brd_criteria" not in st.session_state:
-    st.session_state.brd_criteria = ""
+# -----------------------------
+# Gemini Client
+# -----------------------------
+def get_client():
+    api_key = st.secrets.get("GEMINI_API_KEY", None)
+    if not api_key:
+        st.error("Missing GEMINI_API_KEY in Streamlit Secrets.")
+        st.stop()
+    return genai.Client(api_key=api_key)
 
-if "chat_histories" not in st.session_state:
-    st.session_state.chat_histories = {
-        "Sarah Walid": [],
-        "Omar Khalid": [],
-        "Faisal Saad": [],
-        "Naser Bader": [],
-        "Reem Fahd": []
+
+def call_gemini(prompt: str, temperature: float = 0.4) -> str:
+    client = get_client()
+    try:
+        response = client.models.generate_content(
+            model=MODEL_NAME,
+            contents=prompt,
+            config={
+                "temperature": temperature,
+                "max_output_tokens": 450,
+            },
+        )
+        return response.text.strip() if response.text else "I could not generate a response."
+    except Exception as e:
+        return f"Error while contacting Gemini: {e}"
+
+# -----------------------------
+# Session State
+# -----------------------------
+def init_state():
+    defaults = {
+        "step": "welcome",
+        "user_name": "",
+        "problem_statement": "",
+        "brd": {
+            "overview": "",
+            "objectives": "",
+            "scope_in": "",
+            "scope_out": "",
+            "business_requirements": "",
+            "functional_requirements": "",
+            "acceptance_criteria": "",
+        },
+        "review": "",
+        "chats": {},
+        "completed_interviews": set(),
     }
+    for key, value in defaults.items():
+        if key not in st.session_state:
+            st.session_state[key] = value
 
-try:
-    API_KEY = st.secrets["GEMINI_API_KEY"]
-    genai.configure(api_key=API_KEY)
-except Exception:
-    pass
 
-# Navigation Controllers
-def go_forward(): st.session_state.page += 1
-def go_backward(): st.session_state.page -= 1
+init_state()
 
-# ==========================================
-# 4. Simulation Stage View Engines
-# ==========================================
+# -----------------------------
+# Data
+# -----------------------------
+EMAIL_TEXT = """
+From: Abdullah Salem — Operations Director  
+To: {name} — Business Analyst  
+Subject: Urgent Investigation Required — Delivery Delays
 
-# --- PAGE 1: Intro Splash Screen ---
-if st.session_state.page == 1:
-    st.title("Welcome to the BRD Simulation")
-    st.write("Experience a realistic Business Analysis scenario. Communicate with stakeholders, gather requirements, and create a professional BRD.")
-    
-    name_input = st.text_input("Enter Your Name", placeholder="e.g., Ali")
-    if name_input.strip():
-        st.session_state.user_name = name_input.strip()
-        
-    st.write("")
-    st.button("Start Simulation", on_click=go_forward)
+Good morning,
 
-# --- PAGE 2: Notification & Corporate Assignment ---
-elif st.session_state.page == 2:
-    st.title(f"Welcome, {st.session_state.user_name}")
-    st.subheader("You are now working as a Business Analyst at SwiftDrop Logistics.")
-    st.caption("Monday — 8:12 AM")
-    
-    st.info("📬 You have received a new urgent email from the Operations Director.")
-    st.write("")
-    st.button("Open Email", on_click=go_forward)
+Over the past three months, Veltra Logistics has experienced a noticeable increase in delayed deliveries across multiple cities. Customer complaints related to delivery delays have increased by 35%, and our average delivery delay has reached 28 minutes during peak hours.
 
-# --- PAGE 3: The Urgent Email Briefing ---
-elif st.session_state.page == 3:
-    st.subheader("📬 Corporate Inbox")
-    
-    st.markdown(f"""
-    <div style="background-color: #1e293b; padding: 22px; border-radius: 12px; border-left: 5px solid #ef4444;">
-        <p><strong>From:</strong> Abdullah Salem — Operations Director</p>
-        <p><strong>To:</strong> {st.session_state.user_name} — Business Analyst</p>
-        <p><strong>Subject:</strong> Urgent Investigation Required — Delivery Delays</p>
-        <hr style="border-color: #334155; margin: 12px 0;">
-        <p>Good morning,</p>
-        <p>Over the past three months, Veltra Logistics has experienced a noticeable increase in delayed deliveries across multiple cities. Customer complaints related to delivery delays have increased by 35%, and our average delivery delay has reached 28 minutes during peak hours.</p>
-        <p>This issue is beginning to negatively affect customer satisfaction and overall operational performance. Recent customer satisfaction reports show a drop from 82% to 64%, and refund requests related to delayed orders are continuing to rise.</p>
-        <p>At this stage, management would like a clearer understanding of:</p>
-        <ul>
-            <li>what is causing these delays,</li>
-            <li>how current delivery operations are functioning,</li>
-            <li>and what improvements may be required.</li>
-        </ul>
-        <p>You have been assigned to investigate the issue, communicate with the relevant stakeholders, and help identify potential business and operational requirements.</p>
-        <p>The following stakeholders are available for discussion:</p>
-        <ul>
-            <li><strong>Sarah Walid</strong> — Operations Manager</li>
-            <li><strong>Omar Khalid</strong> — Customer Support Lead</li>
-            <li><strong>Faisal Saad</strong> — Delivery Driver</li>
-            <li><strong>Naser Bader</strong> — CEO</li>
-            <li><strong>Reem Fahd</strong> — Customer</li>
-        </ul>
-        <p>Please begin your investigation as soon as possible.</p>
-        <p>Regards,<br><strong>Abdullah Salem</strong><br>Operations Director<br>Veltra Logistics</p>
-    </div>
-    """, unsafe_allow_html=True)
-    
-    st.write("")
-    col1, col2 = st.columns([1, 4])
-    with col1: st.button("Back", on_click=go_backward)
-    with col2: st.button("Continue", on_click=go_forward)
+This issue is beginning to negatively affect customer satisfaction and overall operational performance. Recent customer satisfaction reports show a drop from 82% to 64%, and refund requests related to delayed orders are continuing to rise.
 
-# --- PAGE 4: Volatile Memory Safeguard Warning ---
-elif st.session_state.page == 4:
-    st.title("Before You Begin")
-    st.warning("""
-    This simulation does not currently save progress automatically. 
-    If you refresh the page or leave the website, your work may be lost. 
-    For the best experience, consider saving your notes or important responses externally while completing the simulation.
-    """)
-    
-    st.write("")
-    col1, col2 = st.columns([1, 4])
-    with col1: st.button("Back", on_click=go_backward)
-    with col2: st.button("Continue", on_click=go_forward)
+At this stage, management would like a clearer understanding of:
+- what is causing these delays,
+- how current delivery operations are functioning,
+- and what improvements may be required.
 
-# --- PAGE 5: Problem Statement Ideation ---
-elif st.session_state.page == 5:
-    st.title("Write the Problem Statement")
-    st.write("Based on the email and the available information, write a clear problem statement describing the business issue.")
-    
-    st.markdown("""
-    *Consider:*
-    * What is the problem?
-    * Who is affected?
-    * What is the business impact?
-    """)
-    
-    st.session_state.problem_statement = st.text_area(
-        "Problem Statement Workspace:",
-        value=st.session_state.problem_statement,
-        placeholder="Type here...",
-        height=220
-    )
-    
-    st.write("")
-    col1, col2 = st.columns([1, 4])
-    with col1: st.button("Back", on_click=go_backward)
-    with col2: st.button("Continue", on_click=go_forward)
+You have been assigned to investigate the issue, communicate with the relevant stakeholders, and help identify potential business and operational requirements.
 
-# --- PAGE 6: Stakeholder Directory Hub & Live Chat Interrogations ---
-elif st.session_state.page == 6:
-    st.title("Stakeholders Directory")
-    st.write("The following stakeholders are available for discussion regarding the delivery delay issue.")
-    
-    # Render Directory List View Components
-    display_stakeholder_card("Sarah Walid", "Operations Manager", "Responsible for overseeing delivery operations and driver assignments.", "Sarah")
-    display_stakeholder_card("Omar Khalid", "Customer Support Lead", "Responsible for handling customer complaints and communication.", "Omar")
-    display_stakeholder_card("Faisal Saad", "Delivery Driver", "Responsible for delivering orders and reporting field-related issues.", "Faisal")
-    display_stakeholder_card("Naser Bader", "CEO", "Responsible for overseeing business performance and strategic direction.", "Naser")
-    display_stakeholder_card("Reem Fahd", "Customer", "Uses the delivery service and reports customer experience issues.", "Reem")
-    
-    st.markdown("---")
-    st.subheader("💬 Enter Live Elicitation Session")
-    
-    selected_target = st.selectbox(
-        "Choose who you want to interview right now:",
-        ["Sarah Walid", "Omar Khalid", "Faisal Saad", "Naser Bader", "Reem Fahd"]
-    )
-    
-    # Explicit Persona Prompt Matrices
-    prompts = {
-        "Sarah Walid": """You are Sarah Walid, the Operations Manager at Veltra Logistics.
+The following stakeholders are available for discussion:
+- Sarah Walid — Operations Manager
+- Omar Khalid — Customer Support Lead
+- Faisal Saad — Delivery Driver
+- Naser Bader — CEO
+- Reem Fahd — Customer
+
+Please begin your investigation as soon as possible.
+
+Regards,  
+Abdullah Salem  
+Operations Director  
+Veltra Logistics
+"""
+
+STAKEHOLDERS = {
+    "Sarah Walid": {
+        "role": "Operations Manager",
+        "responsibility": "Responsible for overseeing delivery operations and driver assignments.",
+        "prompt": """
+You are Sarah Walid, the Operations Manager at Veltra Logistics.
 
 Project Context:
 Veltra Logistics is experiencing increased delivery delays across multiple cities. Customer complaints related to delivery delays increased by 35%, the average delay reached 28 minutes during peak hours, and customer satisfaction dropped from 82% to 64%.
@@ -321,10 +162,7 @@ Your Responsibilities:
 - Identify bottlenecks in the delivery process.
 
 Personality:
-- Direct.
-- Busy.
-- Practical.
-- Focused on operations, efficiency, and KPIs.
+- Direct, busy, practical, KPI-focused.
 - Sometimes defensive when operations are blamed.
 
 What You Know:
@@ -350,9 +188,14 @@ Rules:
 - Do not mention that you are an AI.
 - Share information gradually based on the quality of the user's questions.
 - If the user asks unrelated questions, politely redirect the conversation back to delivery operations.
-- Keep answers realistic, concise, and professional.""",
-        
-        "Omar Khalid": """You are Omar Khalid, the Customer Support Lead at Veltra Logistics.
+- Keep answers realistic, concise, and professional.
+""",
+    },
+    "Omar Khalid": {
+        "role": "Customer Support Lead",
+        "responsibility": "Responsible for handling customer complaints and communication.",
+        "prompt": """
+You are Omar Khalid, the Customer Support Lead at Veltra Logistics.
 
 Project Context:
 Veltra Logistics is experiencing increased delivery delays across multiple cities. Customer complaints related to delivery delays increased by 35%, the average delay reached 28 minutes during peak hours, and customer satisfaction dropped from 82% to 64%.
@@ -364,10 +207,7 @@ Your Responsibilities:
 - Track complaint trends and service quality issues.
 
 Personality:
-- Helpful.
-- Friendly.
-- Overwhelmed.
-- Customer-focused.
+- Helpful, friendly, overwhelmed, customer-focused.
 - Concerned about repeated complaints.
 
 What You Know:
@@ -392,10 +232,15 @@ Rules:
 - Do not break character.
 - Do not mention that you are an AI.
 - Share information gradually based on the quality of the user's questions.
-- If the user asks unrelated questions, politely redirect the conversation back to customer complaints and delivery delay issues.
-- Keep answers realistic, concise, and professional.""",
-        
-        "Faisal Saad": """You are Faisal Saad, a Delivery Driver at Veltra Logistics.
+- If the user asks unrelated questions, politely redirect back to customer complaints and delivery delay issues.
+- Keep answers realistic, concise, and professional.
+""",
+    },
+    "Faisal Saad": {
+        "role": "Delivery Driver",
+        "responsibility": "Responsible for delivering orders and reporting field-related issues.",
+        "prompt": """
+You are Faisal Saad, a Delivery Driver at Veltra Logistics.
 
 Project Context:
 Veltra Logistics is experiencing increased delivery delays across multiple cities. Customer complaints related to delivery delays increased by 35%, the average delay reached 28 minutes during peak hours, and customer satisfaction dropped from 82% to 64%.
@@ -407,10 +252,7 @@ Your Responsibilities:
 - Communicate with dispatchers when there are route or order problems.
 
 Personality:
-- Honest.
-- Practical.
-- Straightforward.
-- Field-focused.
+- Honest, practical, straightforward, field-focused.
 - Sometimes frustrated because drivers are blamed for delays.
 
 What You Know:
@@ -430,17 +272,22 @@ What You Do Not Know:
 Rules:
 - Speak naturally like a real delivery driver.
 - Use simple, practical language.
-- Only discuss topics related to delivery work, routes, assignments, and field issues.
+- Only discuss delivery work, routes, assignments, and field issues.
 - Do not provide ready-made business requirements.
 - Do not directly suggest a complete solution.
 - Do not say “the system shall”.
 - Do not break character.
 - Do not mention that you are an AI.
 - Share information gradually based on the quality of the user's questions.
-- If the user asks unrelated questions, politely redirect the conversation back to delivery work and route issues.
-- Keep answers realistic and concise.""",
-        
-        "Naser Bader": """You are Naser Bader, the CEO of Veltra Logistics.
+- If the user asks unrelated questions, politely redirect back to delivery work and route issues.
+- Keep answers realistic and concise.
+""",
+    },
+    "Naser Bader": {
+        "role": "CEO",
+        "responsibility": "Responsible for overseeing business performance and strategic direction.",
+        "prompt": """
+You are Naser Bader, the CEO of Veltra Logistics.
 
 Project Context:
 Veltra Logistics is experiencing increased delivery delays across multiple cities. Customer complaints related to delivery delays increased by 35%, the average delay reached 28 minutes during peak hours, and customer satisfaction dropped from 82% to 64%.
@@ -452,9 +299,7 @@ Your Responsibilities:
 - Prioritize business goals and investment decisions.
 
 Personality:
-- Strategic.
-- Concise.
-- Business-focused.
+- Strategic, concise, business-focused.
 - Concerned about reputation, revenue, and customer retention.
 - Does not focus on small operational details.
 
@@ -474,17 +319,22 @@ What You Do Not Know:
 Rules:
 - Speak naturally like a real CEO.
 - Keep answers strategic and concise.
-- Only discuss topics related to business impact, customer trust, performance, and strategy.
+- Only discuss business impact, customer trust, performance, and strategy.
 - Do not provide ready-made business requirements.
 - Do not directly suggest a complete solution.
 - Do not say “the system shall”.
 - Do not break character.
 - Do not mention that you are an AI.
 - Share information gradually based on the quality of the user's questions.
-- If the user asks unrelated questions, politely redirect the conversation back to the business impact of delivery delays.
-- Avoid operational details unless the user asks at a high level.""",
-        
-        "Reem Fahd": """You are Reem Fahd, a customer of Veltra Logistics.
+- If the user asks unrelated questions, politely redirect back to the business impact of delivery delays.
+- Avoid operational details unless asked at a high level.
+""",
+    },
+    "Reem Fahd": {
+        "role": "Customer",
+        "responsibility": "Uses the delivery service and reports customer experience issues.",
+        "prompt": """
+You are Reem Fahd, a customer of Veltra Logistics.
 
 Project Context:
 Veltra Logistics is experiencing increased delivery delays across multiple cities. Customer complaints related to delivery delays increased by 35%, the average delay reached 28 minutes during peak hours, and customer satisfaction dropped from 82% to 64%.
@@ -495,9 +345,7 @@ Your Responsibilities:
 - You can only speak from your personal customer experience.
 
 Personality:
-- Honest.
-- Emotional.
-- Simple language.
+- Honest, emotional, simple language.
 - Frustrated because of repeated delays.
 - Focused on communication, tracking, and reliability.
 
@@ -525,303 +373,355 @@ Rules:
 - Do not break character.
 - Do not mention that you are an AI.
 - Share information gradually based on the quality of the user's questions.
-- If the user asks unrelated questions, politely redirect the conversation back to your delivery experience.
-- Keep answers realistic and concise."""
-    }
-    
-    # Active Dialog Render Area
-    dialog_box = st.container()
-    with dialog_box:
-        for bubble in st.session_state.chat_histories[selected_target]:
-            display_chat_bubble(bubble["text"], is_user=(bubble["role"] == "user"))
-            
-    prompt_input = st.chat_input(f"Send a message to {selected_target}...")
-    if prompt_input:
-        st.session_state.chat_histories[selected_target].append({"role": "user", "text": prompt_input})
-        
-        try:
-            model = genai.GenerativeModel('gemini-2.5-flash')
-            context_string = f"{prompts[selected_target]}\n\nDialogue History:\n"
-            for message_turn in st.session_state.chat_histories[selected_target]:
-                context_string += f"{message_turn['role']}: {message_turn['text']}\n"
-                
-            runtime_output = model.generate_content(context_string)
-            agent_text = runtime_output.text
-        except Exception:
-            agent_text = "I am currently reviewing the delivery constraints. Please outline your queries regarding our recent transit benchmarks."
-            
-        st.session_state.chat_histories[selected_target].append({"role": "model", "text": agent_text})
-        st.rerun()
-        
-    st.write("")
-    col1, col2 = st.columns([1, 4])
-    with col1: st.button("Back", on_click=go_backward)
-    with col2: st.button("Continue", on_click=go_forward)
+- If the user asks unrelated questions, politely redirect back to your delivery experience.
+- Keep answers realistic and concise.
+""",
+    },
+}
 
-# --- PAGE 7: BRD Documentation Entry Intro ---
-elif st.session_state.page == 7:
+SAMPLE_BRD = """
+# Sample BRD — Veltra Logistics Delivery Delay Project
+
+This is one possible BRD submission. It is not the only correct answer.
+
+## 1. Project Overview
+
+Veltra Logistics is a mid-sized delivery company operating across multiple cities. Over the past three months, the company has experienced a noticeable increase in delayed deliveries, especially during peak hours. This issue has affected customer satisfaction, increased refund requests, and created pressure on operations, drivers, and customer support teams.
+
+The purpose of this project is to investigate the causes of delivery delays and identify business and system requirements that can improve delivery performance, communication, and customer visibility.
+
+## 2. Business Objectives
+
+- Reduce average delivery delays during peak hours.
+- Improve customer satisfaction related to delivery services.
+- Reduce delivery-related customer complaints and refund requests.
+- Improve communication between dispatchers, drivers, and customer support teams.
+- Increase visibility into delivery operations and order status.
+
+## 3. Project Scope
+
+### In Scope
+- Driver assignment process
+- Delivery tracking visibility
+- Dispatcher and driver communication
+- Customer delivery status updates
+- Customer support access to delivery information
+- Peak-hour delivery operations
+
+### Out of Scope
+- Payment systems
+- Warehouse inventory management
+- Marketing systems
+- HR and recruitment processes
+- Vendor management systems
+
+## 4. Business Requirements
+
+- The business requires improved visibility into delivery operations.
+- The business requires faster and more efficient driver assignment during peak hours.
+- The business requires better communication between operations and customer support teams.
+- The business requires improved customer communication regarding delivery status and delays.
+- The business requires reduced delivery-related complaints and refund requests.
+
+## 5. Functional Requirements
+
+- The system should provide real-time delivery tracking.
+- The system should display updated estimated delivery times.
+- The system should notify customers when delivery delays occur.
+- The system should allow dispatchers to assign drivers through a centralized platform.
+- The system should provide delivery status visibility for customer support agents.
+- The system should allow drivers to receive assignment updates in real time.
+- The system should generate operational reports related to delivery delays and peak-hour performance.
+- The system should allow dispatchers to monitor active deliveries through a dashboard.
+
+## 6. Acceptance Criteria
+
+- Average delivery delays are reduced by at least 30% within three months.
+- Customer satisfaction increases from 64% to at least 80%.
+- Delivery-related complaints decrease by at least 25%.
+- Customer support agents can access live delivery status information.
+- Drivers receive delivery assignments without manual communication delays.
+- Dispatchers can monitor active delivery performance through a centralized dashboard.
+"""
+
+# -----------------------------
+# Helper Functions
+# -----------------------------
+def go(step: str):
+    st.session_state.step = step
+    st.rerun()
+
+
+def reset_simulation():
+    for key in list(st.session_state.keys()):
+        del st.session_state[key]
+    st.rerun()
+
+
+def build_review_prompt() -> str:
+    brd = st.session_state.brd
+    return f"""
+You are a supportive Senior Business Analyst reviewing a beginner-to-intermediate Business Analyst's BRD work.
+
+Important rules:
+- Review only what the user wrote.
+- Do not review stakeholder interviews.
+- Be kind, encouraging, professional, and constructive.
+- Do not provide a full corrected answer.
+- Do not write the solution for the user.
+- Give feedback section by section.
+- Use this format for each section:
+  ✅ Strengths
+  ⚠ Suggestions
+- Avoid harsh words like wrong, bad, or incorrect.
+- Keep the review concise but useful.
+
+User Submission:
+
+Problem Statement:
+{st.session_state.problem_statement}
+
+Project Overview:
+{brd['overview']}
+
+Business Objectives:
+{brd['objectives']}
+
+In Scope:
+{brd['scope_in']}
+
+Out of Scope:
+{brd['scope_out']}
+
+Business Requirements:
+{brd['business_requirements']}
+
+Functional Requirements:
+{brd['functional_requirements']}
+
+Acceptance Criteria:
+{brd['acceptance_criteria']}
+"""
+
+
+def build_chat_prompt(stakeholder_name: str, user_message: str) -> str:
+    stakeholder = STAKEHOLDERS[stakeholder_name]
+    history = st.session_state.chats.get(stakeholder_name, [])[-8:]
+    history_text = "\n".join([f"{m['role']}: {m['content']}" for m in history])
+
+    return f"""
+{stakeholder['prompt']}
+
+Conversation History:
+{history_text}
+
+Current User Question:
+{user_message}
+
+Respond as {stakeholder_name}. Keep the answer natural and not too long.
+"""
+
+# -----------------------------
+# Screens
+# -----------------------------
+def screen_welcome():
+    st.title("Welcome to the BRD Simulation")
+    st.write("Experience a realistic Business Analysis scenario. Communicate with stakeholders, gather information, and create a professional BRD.")
+    name = st.text_input("Enter your name", value=st.session_state.user_name)
+    if st.button("Start Simulation", type="primary"):
+        if not name.strip():
+            st.warning("Please enter your name to start.")
+        else:
+            st.session_state.user_name = name.strip()
+            go("intro")
+
+
+def screen_intro():
+    st.title(f"Welcome, {st.session_state.user_name}")
+    st.write("You are now working as a Business Analyst at Veltra Logistics.")
+    st.info("Monday — 8:12 AM\n\nYou have received a new urgent email from the Operations Director.")
+    if st.button("Open Email", type="primary"):
+        go("email")
+
+
+def screen_email():
+    st.title("Incoming Email")
+    st.markdown(EMAIL_TEXT.format(name=st.session_state.user_name))
+    if st.button("Continue", type="primary"):
+        go("notice")
+
+
+def screen_notice():
+    st.title("Before You Begin")
+    st.warning("This simulation does not currently save progress automatically. If you refresh the page or leave the website, your work may be lost.")
+    st.write("For the best experience, consider saving your notes or important responses externally while completing the simulation.")
+    if st.button("Continue Simulation", type="primary"):
+        go("problem")
+
+
+def screen_problem():
+    st.title("Write the Problem Statement")
+    st.write("Based on the email and the available information, write a clear problem statement describing the business issue.")
+    st.markdown("""
+**Consider:**
+- What is the problem?
+- Who is affected?
+- What is the business impact?
+""")
+    st.session_state.problem_statement = st.text_area(
+        "Problem Statement",
+        value=st.session_state.problem_statement,
+        height=180,
+    )
+    if st.button("Continue", type="primary"):
+        go("directory")
+
+
+def screen_directory():
+    st.title("Stakeholders Directory")
+    st.write("The following stakeholders are available for discussion regarding the delivery delay issue.")
+
+    for name, data in STAKEHOLDERS.items():
+        with st.container(border=True):
+            col1, col2 = st.columns([3, 1])
+            with col1:
+                st.subheader(name)
+                st.write(f"**{data['role']}**")
+                st.write(data["responsibility"])
+                if name in st.session_state.completed_interviews:
+                    st.success("Interview completed")
+            with col2:
+                if st.button("Start Interview", key=f"interview_{name}"):
+                    st.session_state.active_stakeholder = name
+                    go("chat")
+
+    st.divider()
+    if st.button("Continue to BRD", type="primary"):
+        go("brd")
+
+
+def screen_chat():
+    name = st.session_state.active_stakeholder
+    data = STAKEHOLDERS[name]
+
+    st.title(f"Interview: {name}")
+    st.caption(f"{data['role']} — {data['responsibility']}")
+
+    if name not in st.session_state.chats:
+        st.session_state.chats[name] = []
+
+    for msg in st.session_state.chats[name]:
+        with st.chat_message("user" if msg["role"] == "User" else "assistant"):
+            st.write(msg["content"])
+
+    user_message = st.chat_input("Ask your interview question...")
+    if user_message:
+        st.session_state.chats[name].append({"role": "User", "content": user_message})
+        prompt = build_chat_prompt(name, user_message)
+        answer = call_gemini(prompt, temperature=0.5)
+        st.session_state.chats[name].append({"role": name, "content": answer})
+        st.rerun()
+
+    col1, col2 = st.columns(2)
+    with col1:
+        if st.button("Mark Interview Completed"):
+            st.session_state.completed_interviews.add(name)
+            go("directory")
+    with col2:
+        if st.button("Back to Stakeholders"):
+            go("directory")
+
+
+def screen_brd():
     st.title("Build the BRD")
     st.write("Based on the stakeholder interviews and the collected information, complete the following BRD sections.")
-    st.write("")
-    col1, col2 = st.columns([1, 4])
-    with col1: st.button("Back", on_click=go_backward)
-    with col2: st.button("Continue", on_click=go_forward)
 
-# --- PAGE 8: Section 1 — Project Overview ---
-elif st.session_state.page == 8:
-    st.title("Section 1 — Project Overview")
-    st.write("Briefly describe the company, the problem, and the reason behind the project.")
-    
-    st.session_state.brd_overview = st.text_area("Overview Content Workspace:", value=st.session_state.brd_overview, placeholder="Type here...", height=250)
-    
-    col1, col2 = st.columns([1, 4])
-    with col1: st.button("Back", on_click=go_backward)
-    with col2: st.button("Continue", on_click=go_forward)
+    brd = st.session_state.brd
 
-# --- PAGE 9: Section 2 — Business Objectives ---
-elif st.session_state.page == 9:
-    st.title("Section 2 — Business Objectives")
-    st.write("Define the business goals the company wants to achieve.")
-    
-    st.session_state.brd_objectives = st.text_area("Objectives Content Workspace:", value=st.session_state.brd_objectives, placeholder="Type here...", height=250)
-    
-    col1, col2 = st.columns([1, 4])
-    with col1: st.button("Back", on_click=go_backward)
-    with col2: st.button("Continue", on_click=go_forward)
+    brd["overview"] = st.text_area("1. Project Overview", value=brd["overview"], height=150)
+    brd["objectives"] = st.text_area("2. Business Objectives", value=brd["objectives"], height=150)
 
-# --- PAGE 10: Section 3 — Project Scope (Split Inputs) ---
-elif st.session_state.page == 10:
-    st.title("Section 3 — Project Scope")
-    
-    st.write("**In Scope**")
-    st.session_state.brd_in_scope = st.text_area("Define items inside scope boundaries:", value=st.session_state.brd_in_scope, placeholder="Type here...", height=150, key="in_scope")
-    
-    st.write("**Out of Scope**")
-    st.session_state.brd_out_scope = st.text_area("Define items outside project constraints:", value=st.session_state.brd_out_scope, placeholder="Type here...", height=150, key="out_scope")
-    
-    col1, col2 = st.columns([1, 4])
-    with col1: st.button("Back", on_click=go_backward)
-    with col2: st.button("Continue", on_click=go_forward)
+    st.subheader("3. Project Scope")
+    brd["scope_in"] = st.text_area("In Scope", value=brd["scope_in"], height=120)
+    brd["scope_out"] = st.text_area("Out of Scope", value=brd["scope_out"], height=120)
 
-# --- PAGE 11: Section 4 — Business & Functional Requirements ---
-elif st.session_state.page == 11:
-    st.title("Section 4 — Business & Functional Requirements")
-    
-    st.write("**Business Requirements**")
-    st.session_state.brd_biz_reqs = st.text_area("Enter high-level core business needs:", value=st.session_state.brd_biz_reqs, placeholder="Type here...", height=150, key="biz_reqs")
-    
-    st.write("**Functional Requirements**")
-    st.session_state.brd_func_reqs = st.text_area("Enter technical systems capabilities required:", value=st.session_state.brd_func_reqs, placeholder="Type here...", height=150, key="func_reqs")
-    
-    col1, col2 = st.columns([1, 4])
-    with col1: st.button("Back", on_click=go_backward)
-    with col2: st.button("Continue", on_click=go_forward)
+    st.subheader("4. Business & Functional Requirements")
+    brd["business_requirements"] = st.text_area("Business Requirements", value=brd["business_requirements"], height=150)
+    brd["functional_requirements"] = st.text_area("Functional Requirements", value=brd["functional_requirements"], height=180)
 
-# --- PAGE 12: Section 6 — Acceptance Criteria ---
-elif st.session_state.page == 12:
-    st.title("Section 6 — Acceptance Criteria")
-    st.write("Define how the success of the solution will be measured.")
-    
-    st.session_state.brd_criteria = st.text_area("Acceptance Metrics Workspace:", value=st.session_state.brd_criteria, placeholder="Type here...", height=250)
-    
-    col1, col2 = st.columns([1, 4])
-    with col1: st.button("Back", on_click=go_backward)
-    with col2: st.button("Complete Simulation 🚀", on_click=go_forward)
+    brd["acceptance_criteria"] = st.text_area("5. Acceptance Criteria", value=brd["acceptance_criteria"], height=150)
 
-# --- PAGE 13: Granular Feedback Engine & Best Practice Blueprint ---
-elif st.session_state.page == 13:
+    if st.button("Submit BRD for Review", type="primary"):
+        with st.spinner("Reviewing your BRD..."):
+            st.session_state.review = call_gemini(build_review_prompt(), temperature=0.3)
+        go("review")
+
+
+def screen_review():
     st.title("BRD Review & Feedback")
-    st.balloons()
-    
-    composite_brd = f"""
-    Problem Statement: {st.session_state.problem_statement}
-    Project Overview: {st.session_state.brd_overview}
-    Objectives: {st.session_state.brd_objectives}
-    In Scope: {st.session_state.brd_in_scope} | Out Scope: {st.session_state.brd_out_scope}
-    Business Reqs: {st.session_state.brd_biz_reqs} | Functional Reqs: {st.session_state.brd_func_reqs}
-    Acceptance Criteria: {st.session_state.brd_criteria}
-    """
-    
-    with st.spinner("Your Senior Coach is evaluating each section of your BRD..."):
-        try:
-            model = genai.GenerativeModel('gemini-2.5-flash')
-            review_prompt = f"""
-            You are an elite, highly supportive Senior Business Analyst Coach. 
-            Evaluate the junior analyst's compiled BRD fields provided below.
-            Your output MUST be entirely in professional English.
-            Your evaluation tone must be: Professional, Gentle, Supportive, Encouraging, and Guiding.
-            CRITICAL RULE: Do NOT give ready-made answers or rewritten solutions. Ask guiding questions instead.
-            
-            You must structure your feedback exactly in a 'Section by Section' format as follows:
-            
-            ### Problem Statement
-            **Strengths**
-            - [List strengths or acknowledge attempt]
-            **Suggestions**
-            - [List actionable improvements or considerations]
-            
-            ### Project Overview
-            **Strengths**
-            - ...
-            **Suggestions**
-            - ...
-            
-            [Repeat this exact structure for: Business Objectives, Project Scope, Requirements, and Acceptance Criteria].
-            
-            Data to review:
-            {composite_brd}
-            """
-            analysis_output = model.generate_content(review_prompt)
-            st.markdown(f"<div style='background-color: #1e293b; padding: 25px; border-radius: 14px; border: 1px solid #06b6d4;'>{analysis_output.text}</div>", unsafe_allow_html=True)
-        except Exception:
-            st.markdown("""
-            <div style='background-color: #1e293b; padding: 20px; border-radius: 12px;'>
-                <h3>Problem Statement</h3>
-                <p><strong>Strengths:</strong> You targeted core metric changes accurately.</p>
-                <p><strong>Suggestions:</strong> Consider adding details about the financial impacts of increased refunds.</p>
-                <h3>Requirements Review</h3>
-                <p><strong>Strengths:</strong> Good differentiation of roles.</p>
-                <p><strong>Suggestions:</strong> Did you capture the route-optimization bottlenecks raised by Faisal during the field interview?</p>
-            </div>
-            """, unsafe_allow_html=True)
-            
-    st.markdown("---")
-    
-    if "show_sample" not in st.session_state:
-        st.session_state.show_sample = False
-        
-    if st.button("View One Possible Solution"):
-        st.session_state.show_sample = True
-        
-    if st.session_state.show_sample:
-        st.markdown("""
-        <div style="background-color: #0f172a; padding: 25px; border-radius: 14px; border: 1px solid rgba(99,102,241,0.3); margin-top: 15px;">
-        
-        # Sample BRD — Veltra Logistics Delivery Delay Project
+    st.markdown(st.session_state.review)
 
-        ## 1. Project Overview
-        Veltra Logistics is a mid-sized delivery company operating across multiple cities. Over the past three months, the company has experienced a noticeable increase in delayed deliveries, particularly during peak hours. This issue has negatively affected customer satisfaction, increased refund requests, and created operational pressure across multiple departments.
-        Management initiated this project to better understand the root causes of delivery delays and identify improvements that can enhance operational efficiency and customer experience.
+    st.divider()
+    if st.button("View Sample BRD", type="primary"):
+        go("sample")
 
-        ## 2. Business Objectives
-        * Reduce average delivery delays during peak hours.
-        * Improve customer satisfaction related to delivery services.
-        * Reduce delivery-related customer complaints and refund requests.
-        * Improve communication between dispatchers, drivers, and customer support teams.
-        * Increase visibility into delivery operations and order status.
 
-        ## 3. Project Scope
-        ### In Scope
-        * Driver assignment process
-        * Delivery tracking visibility
-        * Dispatcher and driver communication
-        * Customer delivery status updates
-        * Customer support access to delivery information
-        * Peak-hour delivery operations
-        ### Out of Scope
-        * Payment systems
-        * Warehouse inventory management
-        * Marketing systems
-        * HR and recruitment processes
-        * Vendor management systems
+def screen_sample():
+    st.title("Sample BRD")
+    st.info("This is one possible BRD submission. It is not the only correct answer.")
+    st.markdown(SAMPLE_BRD)
 
-        ## 4. Business Requirements
-        * The business requires improved visibility into delivery operations.
-        * The business requires faster and more efficient driver assignment during peak hours.
-        * The business requires better communication between operations and customer support teams.
-        * The business requires improved customer communication regarding delivery status and delays.
-        * The business requires reduction in delivery-related complaints and refund requests.
+    st.divider()
+    if st.button("Finish Simulation", type="primary"):
+        go("final")
 
-        ## 5. Functional Requirements
-        * The system should provide real-time delivery tracking.
-        * The system should display updated estimated delivery times.
-        * The system should notify customers when delays occur.
-        * The system should allow dispatchers to assign drivers through a centralized platform.
-        * The system should provide delivery status visibility for customer support agents.
-        * The system should allow drivers to receive assignment updates in real time.
-        * The system should generate operational reports related to delivery delays and peak-hour performance.
-        * The system should allow dispatchers to monitor active deliveries through a dashboard.
 
-        ## 6. Acceptance Criteria
-        * Average delivery delays are reduced by at least 30% within three months.
-        * Customer satisfaction scores increase from 64% to at least 80%.
-        * Delivery-related complaints decrease by at least 25%.
-        * Customer support agents can access live delivery status information.
-        * Drivers receive delivery assignments without manual communication delays.
-        * Dispatchers can monitor delivery performance through a centralized dashboard.
-
-        ## 7. Proposed Solution Approach
-        One possible solution approach is implementing a centralized delivery management platform that supports automated driver assignment, real-time delivery tracking, and improved communication between operational teams.
-        The proposed solution may include:
-        * Automated route and driver assignment
-        * Real-time delivery tracking
-        * Customer delay notifications
-        * Dispatcher monitoring dashboard
-        * Live delivery visibility for customer support teams
-        This solution aims to improve operational efficiency, reduce delivery delays, and enhance customer experience.
-
-        ## 8. Expected Benefits
-        * Improved delivery performance
-        * Faster operational communication
-        * Reduced customer frustration
-        * Better delivery visibility
-        * Increased customer trust and retention
-        * Reduced refund requests and operational inefficiencies
-
-        ## 9. Important Note
-        This document represents one possible business analysis outcome based on the available stakeholder information and project context. Different analysis approaches may lead to alternative valid solutions depending on business priorities, operational constraints, and stakeholder needs.
-        </div>
-        """, unsafe_allow_html=True)
-        
-    st.write("")
-    st.button("End", on_click=go_forward)
-
-# --- PAGE 14: Closing Out & Networking ---
-elif st.session_state.page == 14:
+def screen_final():
     st.title("Thank You for Completing the Simulation")
     st.write("Thank you for participating in the BRD Simulation experience.")
-    
-    st.write("")
-    st.markdown("""
-        <a href="https://www.linkedin.com/in/kumail-alhuwayji" target="_blank">
-            <button style="
-                background: linear-gradient(90deg, #4f46e5 0%, #06b6d4 100%);
-                color: white;
-                border-radius: 10px;
-                border: none;
-                padding: 12px 24px;
-                font-weight: bold;
-                cursor: pointer;
-                width: 100%;
-                box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
-            ">
-                🔗 Connect on LinkedIn
-            </button>
-        </a>
-        <p style="text-align: center; font-size: 0.85rem; color: #94a3b8; margin-top: 10px;">
-            Your feedback can help improve future simulation experiences.
-        </p>
-    """, unsafe_allow_html=True)
-    
-    if st.button("🔄 Restart Simulation"):
-        st.session_state.page = 1
-        st.session_state.chat_histories = {k: [] for k in st.session_state.chat_histories}
-        st.session_state.problem_statement = ""
-        st.session_state.brd_overview = ""
-        st.session_state.brd_objectives = ""
-        st.session_state.brd_in_scope = ""
-        st.session_state.brd_out_scope = ""
-        st.session_state.brd_biz_reqs = ""
-        st.session_state.brd_func_reqs = ""
-        st.session_state.brd_criteria = ""
-        st.session_state.show_sample = False
-        st.rerun()
+    st.write("If you have any suggestions, feedback, or ideas for future simulations, feel free to connect with me on LinkedIn.")
+    st.link_button("Connect on LinkedIn", LINKEDIN_URL)
 
-# ==========================================
-# 5. Persistent Responsive Footer Elements
-# ==========================================
-st.markdown("""
-    <div class="global-footer">
-        Built By <a href="https://www.linkedin.com/in/kumail-alhuwayji" target="_blank">Kumail Alhuwayji</a>
-    </div>
-""", unsafe_allow_html=True)
+    st.divider()
+    if st.button("Restart Simulation"):
+        reset_simulation()
+
+# -----------------------------
+# Router
+# -----------------------------
+render_header()
+
+step = st.session_state.step
+if step == "welcome":
+    screen_welcome()
+elif step == "intro":
+    screen_intro()
+elif step == "email":
+    screen_email()
+elif step == "notice":
+    screen_notice()
+elif step == "problem":
+    screen_problem()
+elif step == "directory":
+    screen_directory()
+elif step == "chat":
+    screen_chat()
+elif step == "brd":
+    screen_brd()
+elif step == "review":
+    screen_review()
+elif step == "sample":
+    screen_sample()
+elif step == "final":
+    screen_final()
+else:
+    screen_welcome()
+
+render_footer()
+
+# Sidebar controls
+with st.sidebar:
+    st.subheader("Simulation Menu")
+    if st.button("Restart"):
+        reset_simulation()
+    st.caption("Progress is saved only during the current session.")
